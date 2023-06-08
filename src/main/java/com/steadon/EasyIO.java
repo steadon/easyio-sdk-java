@@ -112,7 +112,9 @@ public class EasyIO {
         Response response = client.newCall(request).execute();
         ResponseBody responseBody = response.body();
         // 创建Gson对象
-        System.out.println(responseBody.string());
+        if (responseBody != null) {
+            System.out.println(responseBody.string());
+        }
     }
 
     // Helper method to convert MultipartFile to File
