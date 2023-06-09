@@ -16,10 +16,13 @@ import java.util.List;
 
 /**
  * EasyIO的Java工具包
+ * <p>
  * 目前仅包含必要的方法:
  * 1. 更新签名
  * 2. 上传图片
  * 3. 查看图片
+ * <p>
+ * 配置文件需要和easyio的配置保持一致
  *
  * @author Steadon
  * @version 1.0.0
@@ -28,40 +31,36 @@ import java.util.List;
 @Component
 @ConfigurationProperties(prefix = "easyio")
 public class EasyIO {
+    private static final String LOGIN_PATH = "/user/login";
+    private static final String UPLOAD_PATH = "/action/upload";
+    private static final String SHOW_IMAGES_PATH = "/action/show/img";
+    private static final String DELETE_DIR_PATH = "/action/delete/dir";
+    private static final String DELETE_IMAGE_PATH = "/action/delete/img";
 
     private String server = "https://www.haorui.xyz:8001";
-
+    private String prefix = "image";
     private String username = "root";
-
-    private String password = "1234";
-
+    private String password = "123456";
     private String _token;
 
-    public String getServer() {
-        return server;
+    public EasyIO() {
+        Unirest.config().defaultBaseUrl(server);
     }
 
     public void setServer(String server) {
         this.server = server;
     }
 
-    public String getUsername() {
-        return username;
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 
     public void setUsername(String username) {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public EasyIO() {
     }
 
     /**
@@ -70,44 +69,45 @@ public class EasyIO {
      * 开发者应该自行在适当的时候调用该方法更新token，具体间隔参考配置文件中token的过期时间
      */
     public void UpdateToken() {
-        Unirest.config().defaultBaseUrl(server);
-        HttpResponse<TokenStr> response = Unirest.post("/user/login")
+        HttpResponse<TokenStr> response = Unirest.post(LOGIN_PATH)
                 .header("Content-Type", "application/json")
                 .body(new SignInParam(username, password))
                 .asObject(TokenStr.class);
         if (!response.isSuccess()) {
-            throw new RuntimeException("更新 token 失败:code=" + response.getStatus());
+            throw new RuntimeException("更新token失败:code=" + response.getStatus());
         }
         _token = response.getBody().getToken();
     }
 
     /**
      * 上传图片到指定路径
+     * 需要注意路径是相对于images/...的路径
      *
      * @param file  自行接收参数传入方法
      * @param group 图片存放的相对于根目录的路径
      * @param name  图片名称(带后缀)
-     * @return true or false
+     * @return url or null
      */
-    public boolean UploadImg(MultipartFile file, String group, String name) {
-        Unirest.config().defaultBaseUrl(server);
-        HttpResponse<String> response = Unirest.post("/action/upload")
+    public String UploadImg(MultipartFile file, String group, String name) {
+        File uploadFile = new File(convertMultipartFileToFile(file).getPath());
+        HttpResponse<String> response = Unirest.post(UPLOAD_PATH)
                 .header("Authorization", _token)
-                .field("file", new File(convertMultipartFileToFile(file).getPath()))
+                .field("file", uploadFile)
                 .field("group", group)
                 .field("name", name)
                 .asString();
-        return response.isSuccess();
+        if (!response.isSuccess()) return null;
+        return server + prefix + group + name + getFileExtension(file);
     }
 
     /**
      * 展示图片列表
+     * 需要注意分组是目录相对于images/...的路径
      *
-     * @param group 图片存放的上级路径
+     * @param group 图片相对路径
      */
     public List<FilePath> showImages(String group) {
-        Unirest.config().defaultBaseUrl(server);
-        HttpResponse<FilePaths> response = Unirest.get("/action/show/img?group=" + group)
+        HttpResponse<FilePaths> response = Unirest.get(SHOW_IMAGES_PATH + "?group=" + group)
                 .header("Authorization", _token)
                 .asObject(FilePaths.class);
         if (!response.isSuccess()) {
@@ -116,14 +116,49 @@ public class EasyIO {
         return response.getBody().getFilePaths();
     }
 
+    /**
+     * 删除指定路径的目录
+     * 需要注意该路径是相对于images/...的路径
+     *
+     * @param path 图片相对路径
+     * @return true or false
+     */
+    public boolean deleteDir(String path) {
+        HttpResponse<String> response = Unirest.delete(DELETE_DIR_PATH + "?path=" + path)
+                .header("Authorization", _token)
+                .asString();
+        return response.isSuccess();
+    }
+
+    /**
+     * 删除指定路径的图片
+     * 需要注意该路径是相对于images/...的路径
+     *
+     * @param path 图片相对路径
+     * @return true or false
+     */
+    public boolean deleteImage(String path) {
+        HttpResponse<String> response = Unirest.delete(DELETE_IMAGE_PATH + "?path=" + path)
+                .header("Authorization", _token)
+                .asString();
+        return response.isSuccess();
+    }
+
     // Helper method to convert MultipartFile to File
     private File convertMultipartFileToFile(MultipartFile multipartFile) {
         try {
-            File file = File.createTempFile("temp", null);
+            File file = File.createTempFile("tmp", getFileExtension(multipartFile));
             multipartFile.transferTo(file);
             return file;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    // Get the extension of zhe file
+    private String getFileExtension(MultipartFile multipartFile) {
+        String originalFilename = multipartFile.getOriginalFilename();
+        assert originalFilename != null;
+        return originalFilename.substring(originalFilename.lastIndexOf("."));
     }
 }
