@@ -4,7 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9066b589-f373-465d-9833-a6ef8666473f" name="更改" comment="初始化项目" />
+    <list default="true" id="9066b589-f373-465d-9833-a6ef8666473f" name="更改" comment="初始化项目">
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/steadon/param/SignInParam.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/steadon/result/FilePath.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/steadon/result/FilePaths.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/steadon/result/TokenStr.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/steadon/EasyIO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/steadon/EasyIO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/steadon/Test.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/spring.factories" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,6 +34,13 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="userSettingsFile" value="$USER_HOME$/apache-maven-3.9.1/apache-maven/src/conf/settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
   <component name="ProjectId" id="2Qt6mBEB7RovHAASkE6zKvuq4z9" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -31,21 +52,26 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "/Users/weibingrui/IdeaProjects/easyio-sdk-java/src/main",
+    "last_opened_file_path": "/Users/weibingrui/IdeaProjects/easyio-sdk-java/src/main/resources",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "settings.editor.selected.configurable": "reference.settings.project.maven.repository.indices",
+    "settings.editor.selected.configurable": "MavenSettings",
     "spring.configuration.checksum": "5bec6e07c6fd067d8c5c7a5d274fdf95",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources" />
       <recent name="$PROJECT_DIR$/src/main" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources/META-INF" />
     </key>
   </component>
   <component name="RunManager">
@@ -81,6 +107,9 @@
       <updated>1686160688539</updated>
       <workItem from="1686160689892" duration="1898000" />
       <workItem from="1686163116888" duration="4369000" />
+      <workItem from="1686194456638" duration="722000" />
+      <workItem from="1686247421003" duration="885000" />
+      <workItem from="1686278694561" duration="7746000" />
     </task>
     <task id="LOCAL-00001" summary="初始化项目">
       <created>1686167494026</created>
@@ -89,7 +118,21 @@
       <option name="project" value="LOCAL" />
       <updated>1686167494026</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="初始化项目">
+      <created>1686194673266</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1686194673266</updated>
+    </task>
+    <task id="LOCAL-00003" summary="初始化项目">
+      <created>1686194722450</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1686194722450</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

@@ -1,25 +1,40 @@
 package com.steadon;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import okhttp3.*;
+import com.steadon.param.SignInParam;
+import com.steadon.result.FilePath;
+import com.steadon.result.FilePaths;
+import com.steadon.result.TokenStr;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.util.List;
 
+/**
+ * EasyIO的Java工具包
+ * 目前仅包含必要的方法:
+ * 1. 更新签名
+ * 2. 上传图片
+ * 3. 查看图片
+ *
+ * @author Steadon
+ * @version 1.0.0
+ * @since 2023.6.9
+ */
 @Component
 @ConfigurationProperties(prefix = "easyio")
 public class EasyIO {
+
     private String server = "https://www.haorui.xyz:8001";
+
     private String username = "root";
+
     private String password = "1234";
+
     private String _token;
 
     public String getServer() {
@@ -46,81 +61,69 @@ public class EasyIO {
         this.password = password;
     }
 
-    public String getToken() {
-        return _token;
-    }
-
-    public void setToken(String token) {
-        this._token = token;
-    }
-
     public EasyIO() {
     }
 
-    public void UpdateToken() throws IOException, InterruptedException {
-        // 创建HttpClient实例
-        HttpClient client = HttpClient.newHttpClient();
-        // 构建JSON请求体
-        String jsonBody = "{\"username\":\"%s\",\"password\":\"%s\"}".formatted(username, password);
-        // 创建POST请求
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("%s/user/login".formatted(server)))
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                .build();
-        // 发送请求并获取响应
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        // 判断请求结果
-        if (response.statusCode() != 200) {
-            throw new RuntimeException("请求失败:code=" + response.statusCode());
+    /**
+     * 更新token以便后续操作
+     * <p>
+     * 开发者应该自行在适当的时候调用该方法更新token，具体间隔参考配置文件中token的过期时间
+     */
+    public void UpdateToken() {
+        Unirest.config().defaultBaseUrl(server);
+        HttpResponse<TokenStr> response = Unirest.post("/user/login")
+                .header("Content-Type", "application/json")
+                .body(new SignInParam(username, password))
+                .asObject(TokenStr.class);
+        if (!response.isSuccess()) {
+            throw new RuntimeException("更新 token 失败:code=" + response.getStatus());
         }
-        // 创建Gson对象
-        Gson gson = new Gson();
-        // 解析JSON字符串
-        JsonObject jsonObject = gson.fromJson(response.body(), JsonObject.class);
-        // 更新token字段的值
-        _token = jsonObject.get("token").getAsString();
+        _token = response.getBody().getToken();
     }
 
-    public boolean UploadImg(MultipartFile file, String group, String name) throws IOException {
-        OkHttpClient client = new OkHttpClient().newBuilder().build();
-        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("file", "",
-                        RequestBody.create(MediaType.parse("application/octet-stream"),
-                                new File(convertMultipartFileToFile(file).getPath())))
-                .addFormDataPart("group", group)
-                .addFormDataPart("name", name)
-                .build();
-
-        Request request = new Request.Builder()
-                .url("%s/action/upload".formatted(server))
-                .post(body)
-                .build();
-
-        int code = client.newCall(request).execute().code();
-        return code != 200;
+    /**
+     * 上传图片到指定路径
+     *
+     * @param file  自行接收参数传入方法
+     * @param group 图片存放的相对于根目录的路径
+     * @param name  图片名称(带后缀)
+     * @return true or false
+     */
+    public boolean UploadImg(MultipartFile file, String group, String name) {
+        Unirest.config().defaultBaseUrl(server);
+        HttpResponse<String> response = Unirest.post("/action/upload")
+                .header("Authorization", _token)
+                .field("file", new File(convertMultipartFileToFile(file).getPath()))
+                .field("group", group)
+                .field("name", name)
+                .asString();
+        return response.isSuccess();
     }
 
-    public void showImages(String group) throws IOException {
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
-        Request request = new Request.Builder()
-                .url("https://www.haorui.xyz:8001/action/show/img?group=" + group)
-                .get()
-                .addHeader("User-Agent", "Apifox/1.0.0 (https://www.apifox.cn)")
-                .build();
-        Response response = client.newCall(request).execute();
-        ResponseBody responseBody = response.body();
-        // 创建Gson对象
-        if (responseBody != null) {
-            System.out.println(responseBody.string());
+    /**
+     * 展示图片列表
+     *
+     * @param group 图片存放的上级路径
+     */
+    public List<FilePath> showImages(String group) {
+        Unirest.config().defaultBaseUrl(server);
+        HttpResponse<FilePaths> response = Unirest.get("/action/show/img?group=" + group)
+                .header("Authorization", _token)
+                .asObject(FilePaths.class);
+        if (!response.isSuccess()) {
+            throw new RuntimeException("身份认证失败");
         }
+        return response.getBody().getFilePaths();
     }
 
     // Helper method to convert MultipartFile to File
-    private static File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException {
-        File file = File.createTempFile("temp", null);
-        multipartFile.transferTo(file);
-        return file;
+    private File convertMultipartFileToFile(MultipartFile multipartFile) {
+        try {
+            File file = File.createTempFile("temp", null);
+            multipartFile.transferTo(file);
+            return file;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
